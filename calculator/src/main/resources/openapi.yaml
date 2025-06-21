@@ -1,0 +1,320 @@
+openapi: 3.0.3
+info:
+  title: Calculator Service API
+  version: 0.0.1
+
+paths:
+  /calculator/offers:
+    post:
+      summary: Расчёт возможных условий кредита
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanStatementRequestDto'
+      responses:
+        '200':
+          description: Список LoanOfferDto
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDto'
+  /calculator/calc:
+    post:
+      summary: Валидация присланных данных, скоринг данных и полный расчет параметров кредита
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoringDataDto'
+      responses:
+        '200':
+          description: CreditDto, насыщенный всеми рассчитанными параметрами.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditDto'
+
+components:
+  schemas:
+
+    Gender:
+      type: string
+      description: Пол клиента
+      enum:
+        - MALE
+        - FEMALE
+        - OTHER
+
+    MartialStatus:
+      type: string
+      description: Семейный статус
+      enum:
+        - SINGLE
+        - MARRIED
+        - DIVORCED
+        - WIDOWED
+
+    EmploymentStatus:
+      type: string
+      description: Статус занятости
+      enum:
+        - UNEMPLOYED
+        - SELF_EMPLOYED
+        - BUSINESS_OWNER
+        - EMPLOYED
+
+    Position:
+      type: string
+      description: Должность клиента
+      enum:
+        - JUNIOR
+        - MIDDLE
+        - SENIOR
+        - LEAD
+        - MANAGER
+        - TOP_MANAGER
+
+    PersonInfoDto:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - birthdate
+        - passportNumber
+        - passportSeries
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          nullable: true
+          description: Отчество(опционально)
+          pattern: '^[A-Za-z]+$'
+        birthdate:
+          type: string
+          format: date
+        passportSeries:
+          type: string
+          pattern: '^[0-9]{4}$'
+        passportNumber:
+          type: string
+          pattern: '^[0-9]{6}$'
+
+    LoanStatementRequestDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PersonInfoDto'
+      required:
+        - amount
+        - term
+        - email
+      properties:
+        amount:
+          type: number
+          format: decimal
+          minimum: 20000
+          description: Сумма кредита, >20000
+        term:
+          type: integer
+          minimum: 6
+          description: Срок кредита в месяцах, минимум 6
+        email:
+          type: string
+          format: email
+
+    LoanOfferDto:
+      type: object
+      required:
+        - statementId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: Идентификатор заявки (UUID)
+        requestedAmount:
+          type: number
+          format: decimal
+          description: Запрошенная сумма
+        totalAmount:
+          type: number
+          format: decimal
+        term:
+          type: integer
+          description: Срок кредита в месяцах
+        monthlyPayment:
+          type: number
+          description: Ежемесячный платёж
+        rate:
+          type: number
+          description: Процентная ставка (годовая)
+        isInsuranceEnabled:
+          type: boolean
+          description: Страхование подключено
+        isSalaryClient:
+          type: boolean
+          description: Зарплатный клиент
+
+    ScoringDataDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PersonInfoDto'
+      required:
+        - amount
+        - term
+        - gender
+        - passportIssueDate
+        - passportIssueBranch
+        - maritalStatus
+        - dependentAmount
+        - employment
+        - accountNumber
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        amount:
+          type: number
+          minimum: 20000
+          description: Запрошенная сумма кредита, ≥ 20000
+        term:
+          type: integer
+          minimum: 6
+          description: Срок кредита в месяцах, ≥ 6
+        gender:
+          $ref: '#/components/schemas/Gender'
+        passportIssueDate:
+          type: string
+          format: date
+          description: Дата выдачи паспорта
+        passportIssueBranch:
+          type: string
+          description: Подразделение, выдавшее паспорт
+        maritalStatus:
+          $ref: '#/components/schemas/Gender'
+        dependentAmount:
+          type: integer
+          minimum: 0
+          description: Количество иждивенцев
+        employment:
+          $ref: '#/components/schemas/EmploymentDto'
+        accountNumber:
+          type: string
+          description: Номер банковского счета
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+
+    CreditDto:
+      type: object
+      required:
+        - amount
+        - term
+        - monthlyPayment
+        - rate
+        - psk
+        - isInsuranceEnabled
+        - isSalaryClient
+        - paymentSchedule
+      properties:
+        amount:
+          type: number
+          description: Сумма кредита
+        term:
+          type: integer
+          description: Срок кредита
+        monthlyPayment:
+          type: number
+          description: Ежемесячный платёж
+        rate:
+          type: number
+          description: Процентная ставка
+        psk:
+          type: number
+          description: Полная стоимость кредита (ПСК)
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+        paymentSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentScheduleElementDto'
+
+    EmploymentDto:
+      type: object
+      required:
+        - employmentStatus
+        - employerINN
+        - salary
+        - position
+        - workExperienceTotal
+        - workExperienceCurrent
+      properties:
+        employmentStatus:
+          $ref: '#/components/schemas/EmploymentStatus'
+        employerINN:
+          type: string
+          pattern: '^[0-9]{10}$'
+          description: ИНН работодателя, 10 цифр
+        salary:
+          type: number
+          minimum: 0
+          description: Зарплата клиента
+        position:
+          $ref: '#/components/schemas/Position'
+        workExperienceTotal:
+          type: integer
+          minimum: 18
+          description: Общий стаж в месяцах, ≥ 18 (иначе отказ)
+        workExperienceCurrent:
+          type: integer
+          minimum: 3
+          description: Стаж на текущей работе в месяцах, ≥ 3 (иначе отказ)
+
+    PaymentScheduleElementDto:
+      type: object
+      required:
+        - number
+        - date
+        - totalPayment
+        - interestPayment
+        - debtPayment
+        - remainingDebt
+      properties:
+        number:
+          type: integer
+          description: Номер платежа в графике
+        date:
+          type: string
+          format: date
+          description: Дата платежа
+        totalPayment:
+          type: number
+        interestPayment:
+          type: number
+        debtPayment:
+          type: number
+        remainingDebt:
+          type: number
