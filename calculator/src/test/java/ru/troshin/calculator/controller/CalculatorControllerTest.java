@@ -34,7 +34,7 @@ class CalculatorControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
+    private static final ZoneId ZONE = ZoneId.of("Europe/Saratov");
 
     @Test
     void offersEndpoint_validRequest_returnsOffers() throws Exception {

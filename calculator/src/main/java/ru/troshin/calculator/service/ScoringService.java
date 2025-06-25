@@ -6,5 +6,5 @@ import java.math.BigDecimal;
 
 public interface ScoringService {
 
-    BigDecimal calculateRate(ScoringDataDto scoringDto,BigDecimal baseRate);
+    BigDecimal calculateRate(ScoringDataDto scoringDto, BigDecimal baseRate);
 }

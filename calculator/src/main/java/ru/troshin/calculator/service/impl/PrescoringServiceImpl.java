@@ -13,22 +13,9 @@ import java.time.Period;
 public class PrescoringServiceImpl implements PrescoringService {
 
     @Override
-    public void validateBirthdate(LocalDate birthdate) {
-        log.debug("Prescoring validation for {}", birthdate);
-        if (birthdate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Дата рождения не может быть в будущем");
-        }
-        int age= Period.between(birthdate,LocalDate.now()).getYears();
-        if(age<18){
-            log.warn("Prescoring failed: age {} < 18", age);
-            throw new IllegalArgumentException("Клиент должен быть старше 18 лет");
-        }
-    }
-
-    @Override
     public void validatePassportIssueDate(LocalDate issueDate) {
         log.debug("Prescoring validation for {}", issueDate);
-        if(issueDate.isAfter(LocalDate.now())){
+        if (issueDate.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Дата выдачи паспорта не может быть позднее чем текущие дата и время");
         }
     }

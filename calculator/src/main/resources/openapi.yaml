@@ -20,8 +20,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-        default:
-          $ref: '#/components/responses/UnexpectedError'
+
 
   /calculator/calc:
     post:
@@ -186,12 +185,13 @@ components:
           type: string
           minLength: 2
           maxLength: 30
-#          nullable: true
+          #          nullable: true
           description: Отчество(опционально)
           pattern: '^[A-Za-z]+$'
         birthdate:
           type: string
           format: date
+          x-field-extra-annotation: '@DateOfBirth'
           example: "1990-08-15"
         passportSeries:
           type: string

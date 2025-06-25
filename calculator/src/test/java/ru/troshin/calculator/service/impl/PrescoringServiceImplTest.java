@@ -12,36 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PrescoringServiceImplTest {
 
     private PrescoringService prescoringService;
-    private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
+    private static final ZoneId ZONE = ZoneId.of("Europe/Saratov");
 
     @BeforeEach
     void setUp() {
         prescoringService = new PrescoringServiceImpl();
-    }
-
-    @Test
-    void validateBirthdate_futureDate_throws() {
-        LocalDate future = LocalDate.now(ZONE).plusDays(1);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                prescoringService.validateBirthdate(future));
-        assertTrue(ex.getMessage().contains("не может быть в будущем"));
-    }
-
-    @Test
-    void validateBirthdate_tooYoung_throws() {
-        LocalDate today = LocalDate.now(ZONE);
-        LocalDate under18 = today.minusYears(17).plusDays(1);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                prescoringService.validateBirthdate(under18));
-        assertTrue(ex.getMessage().contains("Клиент должен быть старше 18 лет")
-                || ex.getMessage().contains("не младше 18"));
-    }
-
-    @Test
-    void validateBirthdate_exactly18_ok() {
-        LocalDate today = LocalDate.now(ZONE);
-        LocalDate exactly18 = today.minusYears(18);
-        assertDoesNotThrow(() -> prescoringService.validateBirthdate(exactly18));
     }
 
     @Test

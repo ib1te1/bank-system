@@ -25,52 +25,55 @@ public class CalculatorServiceImpl implements CalculatorService {
     private final PrescoringService prescoringService;
     private final ScoringService scoringService;
     private final CalculatorProperties calculatorProperties;
+    private static final int MONTHS_IN_YEAR = 12;
 
-    private BigDecimal calculateMonthlyPayment(BigDecimal totalAmount,BigDecimal rate,Integer term){
-        double r=toMonthlyRate(rate);
-        double numerator=Math.pow(1+r,term)*r;
-        double denominator=Math.pow(1+r,term)-1;
-        return totalAmount.multiply(BigDecimal.valueOf(numerator/denominator)).setScale(2, RoundingMode.HALF_UP);
+    private BigDecimal calculateMonthlyPayment(BigDecimal totalAmount, BigDecimal rate, Integer term) {
+        double r = toMonthlyRate(rate);
+        double numerator = Math.pow(1 + r, term) * r;
+        double denominator = Math.pow(1 + r, term) - 1;
+        return totalAmount.multiply(BigDecimal.valueOf(numerator / denominator)).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal calculateInsCost(BigDecimal requestedAmount,BigDecimal rate,Integer term){
-        double r=toMonthlyRate(rate);
-        return requestedAmount.multiply(BigDecimal.valueOf(r*24.0/term*0.02)).setScale(2, RoundingMode.HALF_UP);
+    private BigDecimal calculateInsCost(BigDecimal requestedAmount, BigDecimal rate, Integer term) {
+        double r = toMonthlyRate(rate);
+        return requestedAmount.multiply(BigDecimal.valueOf(r * 24.0 / term * 0.02)).setScale(2, RoundingMode.HALF_UP);
     }
 
-    private double toMonthlyRate(BigDecimal rate){
-        return (rate.doubleValue()/12)/100;
+    private double toMonthlyRate(BigDecimal rate) {
+        return (rate.doubleValue() / MONTHS_IN_YEAR) / 100;
+    }
+
+    private BigDecimal calculateRate(boolean isInsurance, boolean isSalary) {
+        double baseRate = calculatorProperties.getBaseRate();
+        double insuranceReduction = calculatorProperties.getInsuranceRateDelta();
+        double salaryReduction = calculatorProperties.getSalaryClientDelta();
+        double insurance = isInsurance ? insuranceReduction : 0;
+        double salary = isSalary ? salaryReduction : 0;
+        return BigDecimal.valueOf(baseRate + insurance + salary)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
     public List<LoanOfferDto> generateOffers(LoanStatementRequestDto loanStatementRequestDto) {
-        prescoringService.validateBirthdate(loanStatementRequestDto.getBirthdate());
         BigDecimal requestedAmount = loanStatementRequestDto.getAmount();
-        Integer term=loanStatementRequestDto.getTerm();
-        double baseRate=calculatorProperties.getBaseRate();
-        double insuranceReduction =calculatorProperties.getInsuranceRateDelta();
-        double salaryReduction =calculatorProperties.getSalaryClientDelta();
-        List<LoanOfferDto> offers=new ArrayList<>();
-        boolean[] bools={false,true};
-        for(boolean insurance:bools){
-            for (boolean salary:bools){
-                BigDecimal rate=BigDecimal.valueOf(baseRate+(insurance?insuranceReduction:0)+(salary?salaryReduction:0))
-                        .setScale(2, RoundingMode.HALF_UP);
-                BigDecimal insCost=BigDecimal.ZERO;
-                if(insurance){
-                    insCost=calculateInsCost(requestedAmount,rate,term);
-                }
-                BigDecimal totalAmount=requestedAmount.add(insCost);
-                BigDecimal monthlyPayment=calculateMonthlyPayment(totalAmount,rate,term);
+        Integer term = loanStatementRequestDto.getTerm();
+        List<LoanOfferDto> offers = new ArrayList<>();
+        boolean[] bools = {false, true};
+        for (boolean isInsurance : bools) {
+            for (boolean isSalary : bools) {
+                BigDecimal rate = calculateRate(isInsurance, isSalary);
+                BigDecimal insCost = isInsurance ? calculateInsCost(requestedAmount, rate, term) : BigDecimal.ZERO;
+                BigDecimal totalAmount = requestedAmount.add(insCost);
+                BigDecimal monthlyPayment = calculateMonthlyPayment(totalAmount, rate, term);
                 offers.add(new LoanOfferDto(
-                        UUID.randomUUID(),
+                        null,
                         requestedAmount,
                         totalAmount,
                         term,
                         monthlyPayment,
                         rate,
-                        insurance,
-                        salary
+                        isInsurance,
+                        isSalary
                 ));
             }
         }
@@ -78,7 +81,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         return offers;
     }
 
-    private BigDecimal isSalaryAndInsuranceClient(Boolean isInsurance,Boolean isSalary,BigDecimal rate){
+    private BigDecimal isSalaryAndInsuranceClient(Boolean isInsurance, Boolean isSalary, BigDecimal rate) {
         if (Boolean.TRUE.equals(isInsurance)) {
             rate = rate.add(BigDecimal.valueOf(calculatorProperties.getInsuranceRateDelta()));
         }
@@ -88,7 +91,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         return rate;
     }
 
-    private List<PaymentScheduleElementDto> createPaymentSchedule(BigDecimal totalAmount,BigDecimal rate,Integer term,BigDecimal monthlyPayment) {
+    private List<PaymentScheduleElementDto> createPaymentSchedule(BigDecimal totalAmount, BigDecimal rate, Integer term, BigDecimal monthlyPayment) {
         List<PaymentScheduleElementDto> schedule = new ArrayList<>();
         BigDecimal remainingDebt = totalAmount;
         double monthlyRate = toMonthlyRate(rate);
@@ -104,20 +107,20 @@ public class CalculatorServiceImpl implements CalculatorService {
                 newRemaining = BigDecimal.ZERO;
             }
             LocalDate payDate = firstDate.plusMonths(i - 1);
-            PaymentScheduleElementDto elem =new PaymentScheduleElementDto(i,payDate,monthlyPayment,
-                    interestPayment,debtPayment,newRemaining);
+            PaymentScheduleElementDto elem = new PaymentScheduleElementDto(i, payDate, monthlyPayment,
+                    interestPayment, debtPayment, newRemaining);
             schedule.add(elem);
             remainingDebt = newRemaining;
         }
         return schedule;
     }
 
-    private BigDecimal calculatePSK(List<PaymentScheduleElementDto> schedule,Integer term,BigDecimal amount){
+    private BigDecimal calculatePSK(List<PaymentScheduleElementDto> schedule, Integer term, BigDecimal amount) {
         BigDecimal sumPayments = schedule.stream()
                 .map(PaymentScheduleElementDto::getTotalPayment)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal years = BigDecimal.valueOf(term)
-                .divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_UP);
+                .divide(BigDecimal.valueOf(MONTHS_IN_YEAR), 10, RoundingMode.HALF_UP);
         BigDecimal ratio = sumPayments.divide(amount, 10, RoundingMode.HALF_UP);
         BigDecimal psk = ratio.subtract(BigDecimal.ONE)
                 .divide(years, 10, RoundingMode.HALF_UP)
@@ -131,10 +134,9 @@ public class CalculatorServiceImpl implements CalculatorService {
     public CreditDto calculateCredit(ScoringDataDto scoringDataDto) {
         log.info("calculateCredit for {}", scoringDataDto);
         prescoringService.validatePassportIssueDate(scoringDataDto.getPassportIssueDate());
-        prescoringService.validateBirthdate(scoringDataDto.getBirthdate());
-        BigDecimal baseRate=BigDecimal.valueOf(calculatorProperties.getBaseRate());
-        BigDecimal rate = scoringService.calculateRate(scoringDataDto,baseRate);
-        rate=isSalaryAndInsuranceClient(scoringDataDto.getIsInsuranceEnabled(),scoringDataDto.getIsSalaryClient(),rate).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal baseRate = BigDecimal.valueOf(calculatorProperties.getBaseRate());
+        BigDecimal rate = scoringService.calculateRate(scoringDataDto, baseRate);
+        rate = isSalaryAndInsuranceClient(scoringDataDto.getIsInsuranceEnabled(), scoringDataDto.getIsSalaryClient(), rate).setScale(2, RoundingMode.HALF_UP);
         log.debug("Rate after adjustments: {}", rate);
         BigDecimal amount = scoringDataDto.getAmount();
         Integer term = scoringDataDto.getTerm();
@@ -146,10 +148,10 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal monthlyPayment = calculateMonthlyPayment(totalAmount, rate, term);
         log.debug("totalAmount={}, monthlyPayment={}", totalAmount, monthlyPayment);
 
-        List<PaymentScheduleElementDto> schedule = createPaymentSchedule(totalAmount,rate,term,monthlyPayment);
-        BigDecimal psk=calculatePSK(schedule,term,amount);
+        List<PaymentScheduleElementDto> schedule = createPaymentSchedule(totalAmount, rate, term, monthlyPayment);
+        BigDecimal psk = calculatePSK(schedule, term, amount);
 
-        return new CreditDto(amount,term,monthlyPayment,rate,psk,
-                scoringDataDto.getIsInsuranceEnabled(),scoringDataDto.getIsSalaryClient(),schedule);
+        return new CreditDto(amount, term, monthlyPayment, rate, psk,
+                scoringDataDto.getIsInsuranceEnabled(), scoringDataDto.getIsSalaryClient(), schedule);
     }
 }

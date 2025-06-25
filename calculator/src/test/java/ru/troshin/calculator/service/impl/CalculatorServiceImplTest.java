@@ -28,7 +28,7 @@ class CalculatorServiceImplTest {
     private CalculatorProperties properties;
     private CalculatorServiceImpl calculatorService;
 
-    private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
+    private static final ZoneId ZONE = ZoneId.of("Europe/Saratov");
 
     @BeforeEach
     void setUp() {
@@ -57,7 +57,6 @@ class CalculatorServiceImplTest {
     @Test
     void generateOffers_returnsFourOffers_sortedByRateDesc() {
         LoanStatementRequestDto dto = makeLoanStmtDto();
-        doNothing().when(prescoringService).validateBirthdate(dto.getBirthdate());
 
         List<LoanOfferDto> offers = calculatorService.generateOffers(dto);
         assertEquals(4, offers.size());
@@ -78,14 +77,6 @@ class CalculatorServiceImplTest {
         assertTrue(rates.contains(BigDecimal.valueOf(8.00).setScale(2)));
     }
 
-    @Test
-    void generateOffers_prescoringThrows_propagates() {
-        LoanStatementRequestDto dto = makeLoanStmtDto();
-        doThrow(new IllegalArgumentException("invalid")).when(prescoringService).validateBirthdate(dto.getBirthdate());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> calculatorService.generateOffers(dto));
-        assertEquals("invalid", ex.getMessage());
-    }
 
     @Test
     void calculateCredit_successfulScenario() {
@@ -115,7 +106,6 @@ class CalculatorServiceImplTest {
         dto.setIsInsuranceEnabled(false);
         dto.setIsSalaryClient(false);
 
-        doNothing().when(prescoringService).validateBirthdate(dto.getBirthdate());
         doNothing().when(prescoringService).validatePassportIssueDate(dto.getPassportIssueDate());
         when(scoringService.calculateRate(dto, BigDecimal.valueOf(properties.getBaseRate())))
                 .thenReturn(BigDecimal.valueOf(properties.getBaseRate()));
@@ -129,18 +119,6 @@ class CalculatorServiceImplTest {
         assertTrue(credit.getPsk().compareTo(BigDecimal.ZERO) > 0);
     }
 
-    @Test
-    void calculateCredit_prescoringThrows_propagates() {
-        ScoringDataDto dto = new ScoringDataDto();
-        dto.setBirthdate(LocalDate.now(ZONE).minusYears(17));
-        dto.setPassportIssueDate(LocalDate.now(ZONE).minusYears(1));
-        dto.setAmount(BigDecimal.valueOf(20000));
-        dto.setTerm(12);
-        doThrow(new IllegalArgumentException("age invalid")).when(prescoringService).validateBirthdate(dto.getBirthdate());
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> calculatorService.calculateCredit(dto));
-        assertEquals("age invalid", ex.getMessage());
-    }
 
     @Test
     void calculateCredit_scoringThrows_propagates() {
@@ -166,7 +144,6 @@ class CalculatorServiceImplTest {
         dto.setAccountNumber("1234567890123456");
         dto.setIsInsuranceEnabled(false);
         dto.setIsSalaryClient(false);
-        doNothing().when(prescoringService).validateBirthdate(dto.getBirthdate());
         doNothing().when(prescoringService).validatePassportIssueDate(dto.getPassportIssueDate());
         when(scoringService.calculateRate(dto, BigDecimal.valueOf(properties.getBaseRate())))
                 .thenThrow(new IllegalArgumentException("scoring failed"));

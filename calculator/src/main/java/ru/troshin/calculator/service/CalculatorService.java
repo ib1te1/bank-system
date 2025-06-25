@@ -14,6 +14,5 @@ public interface CalculatorService {
 
     CreditDto calculateCredit(ScoringDataDto scoringDataDto);
 
-    
 
 }

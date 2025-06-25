@@ -2,9 +2,7 @@ package ru.troshin.calculator.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.troshin.calculator.config.CalculatorProperties;
 import ru.troshin.calculator.dto.*;
-import ru.troshin.calculator.service.ScoringService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ScoringServiceImplTest {
 
     private ScoringServiceImpl scoringService;
-    private static final ZoneId ZONE = ZoneId.of("Europe/Berlin");
+    private static final ZoneId ZONE = ZoneId.of("Europe/Saratov");
 
     @BeforeEach
     void setUp() {
