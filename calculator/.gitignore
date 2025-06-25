@@ -36,3 +36,8 @@ build/
 .mvn/
 mvnw
 mvnw.cmd
+
+doc/.openapi-generator
+doc/.openapi-generator-ignore
+
+src/main/resources/openapi/templates

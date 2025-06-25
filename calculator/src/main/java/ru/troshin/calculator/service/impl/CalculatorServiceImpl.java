@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -26,6 +25,8 @@ public class CalculatorServiceImpl implements CalculatorService {
     private final ScoringService scoringService;
     private final CalculatorProperties calculatorProperties;
     private static final int MONTHS_IN_YEAR = 12;
+    private static final double MONTHS_IN_2_YEARS = 24.0;
+    private static final double INSURANCE_MULTIPLIER = 0.02;
 
     private BigDecimal calculateMonthlyPayment(BigDecimal totalAmount, BigDecimal rate, Integer term) {
         double r = toMonthlyRate(rate);
@@ -36,7 +37,7 @@ public class CalculatorServiceImpl implements CalculatorService {
 
     private BigDecimal calculateInsCost(BigDecimal requestedAmount, BigDecimal rate, Integer term) {
         double r = toMonthlyRate(rate);
-        return requestedAmount.multiply(BigDecimal.valueOf(r * 24.0 / term * 0.02)).setScale(2, RoundingMode.HALF_UP);
+        return requestedAmount.multiply(BigDecimal.valueOf(r * MONTHS_IN_2_YEARS / term * INSURANCE_MULTIPLIER)).setScale(2, RoundingMode.HALF_UP);
     }
 
     private double toMonthlyRate(BigDecimal rate) {

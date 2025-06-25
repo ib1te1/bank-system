@@ -27,11 +27,16 @@ public class GlobalExceptionHandler {
         return buildClientError("INVALID_REQUEST", message);
     }
 
+    @ExceptionHandler(PrescoringRejectedException.class)
+    public ResponseEntity<ClientError> handleInvalidRequest(PrescoringRejectedException ex) {
+        log.warn("Prescoring rejected: {}", ex.getMessage());
+        return buildClientError(ex.getCode(), ex.getMessage());
+    }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ClientError> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Business error: {}", ex.getMessage());
-        return buildClientError("SCORING_REJECTED", ex.getMessage());
+    @ExceptionHandler(ScoringRejectedException.class)
+    public ResponseEntity<ClientError> handleIllegalArgument(ScoringRejectedException ex) {
+        log.warn("Scoring rejected: {}", ex.getMessage());
+        return buildClientError(ex.getCode(), ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

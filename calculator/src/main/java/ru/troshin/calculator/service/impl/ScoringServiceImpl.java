@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.troshin.calculator.dto.*;
+import ru.troshin.calculator.exception.ScoringRejectedException;
 import ru.troshin.calculator.service.ScoringService;
 
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ public class ScoringServiceImpl implements ScoringService {
     private static final int REQUIRED_CURRENT_EXPERIENCE = 3;
     private static final int MIN_AGE = 20;
     private static final int MAX_AGE = 65;
-    private static final int MONTHS_IN_2_YEAR = 24;
+    private static final int MONTHS_IN_2_YEARS = 24;
     private static final int FEMALE_RISK_AGE_MIN = 31;
     private static final int FEMALE_RISK_AGE_MAX = 60;
     private static final int MALE_RISK_AGE_MIN = 29;
@@ -30,18 +31,18 @@ public class ScoringServiceImpl implements ScoringService {
         int age = Period.between(birthDate, today).getYears();
         if (age < MIN_AGE || age > MAX_AGE) {
             log.warn("Scoring rejected: age {} out of bounds [20,65]", age);
-            throw new IllegalArgumentException("Отказ: возраст не подходит");
+            throw new ScoringRejectedException("Отказ: возраст не подходит");
         }
     }
 
     private static void isValidWorkingExp(EmploymentDto employmentDto) {
         if (employmentDto.getWorkExperienceTotal() < REQUIRED_TOTAL_EXPERIENCE) {
             log.warn("Scoring rejected: total experience {} < 18", employmentDto.getWorkExperienceTotal());
-            throw new IllegalArgumentException("Отказ: общий стаж < 18 месяцев");
+            throw new ScoringRejectedException("Отказ: общий стаж < 18 месяцев");
         }
         if (employmentDto.getWorkExperienceCurrent() < REQUIRED_CURRENT_EXPERIENCE) {
             log.warn("Scoring rejected: current experience {} < 3", employmentDto.getWorkExperienceCurrent());
-            throw new IllegalArgumentException("Отказ: текущий стаж < 3 месяцев");
+            throw new ScoringRejectedException("Отказ: текущий стаж < 3 месяцев");
         }
     }
 
@@ -49,7 +50,7 @@ public class ScoringServiceImpl implements ScoringService {
         return switch (status) {
             case UNEMPLOYED -> {
                 log.warn("Scoring rejected: unemployed");
-                throw new IllegalArgumentException("Отказ: безработный");
+                throw new ScoringRejectedException("Отказ: безработный");
             }
             case SELF_EMPLOYED -> 2;
             case BUSINESS_OWNER -> 1;
@@ -66,9 +67,9 @@ public class ScoringServiceImpl implements ScoringService {
     }
 
     private static void isValidSalary(BigDecimal salary, BigDecimal amount) {
-        if (amount.compareTo(salary.multiply(BigDecimal.valueOf(MONTHS_IN_2_YEAR))) > 0) {
+        if (amount.compareTo(salary.multiply(BigDecimal.valueOf(MONTHS_IN_2_YEARS))) > 0) {
             log.warn("Scoring rejected: amount {} > 24*salary {}", amount, salary);
-            throw new IllegalArgumentException("Отказ: сумма кредита слишком велика относительно зарплаты");
+            throw new ScoringRejectedException("Отказ: сумма кредита слишком велика относительно зарплаты");
         }
     }
 
