@@ -15,13 +15,13 @@ paths:
               $ref: '#/components/schemas/LoanStatementRequestDto'
       responses:
         '200':
-          description: Список LoanOfferDto
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/LoanOfferDto'
+          $ref: '#/components/responses/SuccessOffers'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
   /calculator/calc:
     post:
       summary: Валидация присланных данных, скоринг данных и полный расчет параметров кредита
@@ -33,14 +33,100 @@ paths:
               $ref: '#/components/schemas/ScoringDataDto'
       responses:
         '200':
-          description: CreditDto, насыщенный всеми рассчитанными параметрами.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreditDto'
+          $ref: '#/components/responses/SuccessCredit'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        default:
+          $ref: '#/components/responses/UnexpectedError'
 
 components:
+
+  responses:
+
+    SuccessOffers:
+      description: Список кредитных предложений
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/LoanOfferDto'
+
+    SuccessCredit:
+      description: Полный расчёт кредита
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreditDto'
+
+    BadRequest:
+      description: Ошибка клиента
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientError'
+
+    InternalServerError:
+      description: Ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+
+    UnexpectedError:
+      description: Неожиданная ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnexpectedError'
+
   schemas:
+
+    ClientError:
+      type: object
+      description: Ошибка на стороне клиента
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INVALID_REQUEST"
+        message:
+          type: string
+          example: "Поле amount должно быть ≥ 20000"
+
+
+    ServerError:
+      type: object
+      description: Внутренняя ошибка сервера при обработке запроса
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INTERNAL_ERROR"
+        message:
+          type: string
+          example: "Ошибка при генерации предложений по кредиту"
+
+    UnexpectedError:
+      type: object
+      description: Неожиданная ошибка
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "UNEXPECTED_ERROR"
+        message:
+          type: string
+          example: "Произошла неизвестная ошибка"
+
 
     Gender:
       type: string
@@ -48,9 +134,9 @@ components:
       enum:
         - MALE
         - FEMALE
-        - OTHER
+        - NON_BINARY
 
-    MartialStatus:
+    MaritalStatus:
       type: string
       description: Семейный статус
       enum:
@@ -72,11 +158,8 @@ components:
       type: string
       description: Должность клиента
       enum:
-        - JUNIOR
-        - MIDDLE
-        - SENIOR
-        - LEAD
-        - MANAGER
+        - STAFF
+        - MIDDLE_MANAGER
         - TOP_MANAGER
 
     PersonInfoDto:
@@ -102,12 +185,14 @@ components:
           type: string
           minLength: 2
           maxLength: 30
-          nullable: true
+          #          nullable: true
           description: Отчество(опционально)
           pattern: '^[A-Za-z]+$'
         birthdate:
           type: string
           format: date
+          x-field-extra-annotation: '@DateOfBirth'
+          example: "1990-08-15"
         passportSeries:
           type: string
           pattern: '^[0-9]{4}$'
@@ -211,7 +296,7 @@ components:
           type: string
           description: Подразделение, выдавшее паспорт
         maritalStatus:
-          $ref: '#/components/schemas/Gender'
+          $ref: '#/components/schemas/MaritalStatus'
         dependentAmount:
           type: integer
           minimum: 0
