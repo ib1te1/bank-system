@@ -58,11 +58,11 @@ public class ScoringServiceImpl implements ScoringService {
         };
     }
 
-    private static int rateByPosition(Position position) {
-        return switch (position) {
-            case MIDDLE_MANAGER -> 2;
+    private static int rateByEmploymentPosition(EmploymentPosition employmentPosition) {
+        return switch (employmentPosition) {
+            case MID_MANAGER -> 2;
             case TOP_MANAGER -> 3;
-            case STAFF -> 0;
+            case OWNER, WORKER ->0;
         };
     }
 
@@ -77,7 +77,7 @@ public class ScoringServiceImpl implements ScoringService {
         return switch (status) {
             case MARRIED -> -3;
             case DIVORCED -> 1;
-            case WIDOWED -> -2;
+            case WIDOW_WIDOWER -> -2;
             case SINGLE -> 0;
         };
     }
@@ -106,7 +106,7 @@ public class ScoringServiceImpl implements ScoringService {
         EmploymentDto employmentDto = scoringDto.getEmployment();
         isValidWorkingExp(employmentDto);
         baseRate = baseRate.add(BigDecimal.valueOf(rateByEmpStatus(employmentDto.getEmploymentStatus())));
-        baseRate = baseRate.subtract(BigDecimal.valueOf(rateByPosition(employmentDto.getPosition())));
+        baseRate = baseRate.subtract(BigDecimal.valueOf(rateByEmploymentPosition(employmentDto.getEmploymentPosition())));
         isValidSalary(employmentDto.getSalary(), scoringDto.getAmount());
         baseRate = baseRate.add(BigDecimal.valueOf(rateByMartStatus(scoringDto.getMaritalStatus())));
         baseRate = baseRate.add(BigDecimal.valueOf(rateByGender(scoringDto.getGender(), scoringDto.getBirthdate())));

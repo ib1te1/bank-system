@@ -90,7 +90,7 @@ class CalculatorControllerTest {
         emp.setEmploymentStatus(EmploymentStatus.EMPLOYED);
         emp.setEmployerINN("1234567890");
         emp.setSalary(BigDecimal.valueOf(2000));
-        emp.setPosition(Position.STAFF);
+        emp.setEmploymentPosition(EmploymentPosition.WORKER);
         emp.setWorkExperienceTotal(24);
         emp.setWorkExperienceCurrent(12);
         req.setEmployment(emp);
