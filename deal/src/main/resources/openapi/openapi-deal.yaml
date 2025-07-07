@@ -1,0 +1,470 @@
+openapi: 3.0.3
+info:
+  title: Deal Service API
+  version: 0.0.1
+
+paths:
+  /deal/statement:
+    post:
+      summary: Создать заявку и получить кредитные предложения
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanStatementRequestDto'
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessOffers'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /deal/offer/select:
+    post:
+      summary: Выбрать одно из предложений
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDto'
+      responses:
+        204:
+          $ref: '#/components/responses/NoContentOffer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /deal/calculate/{statementId}:
+    post:
+      summary: Завершить регистрацию и рассчитать кредит
+      parameters:
+        - name: statementId
+          in: path
+          description: UUID заявки
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinishRegistrationRequestDto'
+      responses:
+        204:
+          $ref: '#/components/responses/NoContentLoan'
+        400:
+          $ref: '#/components/schemas/ClientError'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+
+components:
+  responses:
+
+    NoContentLoan:
+      description: Кредит рассчитан и сохранён
+
+    NoContentOffer:
+      description: Оффер выбран, состояние заявки обновлено
+
+    SuccessOffers:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/LoanOfferDto'
+      description: Список кредитных предложений
+
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientError'
+      description: Ошибка клиента
+
+    InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+      description: Ошибка сервера
+
+
+  schemas:
+
+    ClientError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INVALID_REQUEST"
+        message:
+          type: string
+          example: "Поле amount должно быть ≥ 20000"
+      description: Ошибка на стороне клиента
+
+    ServerError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INTERNAL_ERROR"
+        message:
+          type: string
+          example: "Ошибка при генерации предложений по кредиту"
+      description: Внутренняя ошибка сервера при обработке запроса
+
+
+    PersonInfoDto:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - birthdate
+        - passportNumber
+        - passportSeries
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+          description: Отчество(опционально)
+        birthdate:
+          type: string
+          format: date
+          x-field-extra-annotation: '@DateOfBirth'
+          example: "1990-08-15"
+        passportSeries:
+          type: string
+          pattern: '^[0-9]{4}$'
+        passportNumber:
+          type: string
+          pattern: '^[0-9]{6}$'
+
+    EmploymentStatus:
+      type: string
+      enum:
+        - UNEMPLOYED
+        - SELF_EMPLOYED
+        - BUSINESS_OWNER
+        - EMPLOYED
+      description: Статус занятости
+
+    Position:
+      type: string
+      enum:
+        - STAFF
+        - MIDDLE_MANAGER
+        - TOP_MANAGER
+      description: Должность клиента
+
+    ChangeType:
+      type: string
+      enum:
+        - AUTOMATIC
+        - MANUAL
+
+    Gender:
+      type: string
+      enum:
+        - MALE
+        - FEMALE
+        - NON_BINARY
+      description: Пол клиента
+
+    MaritalStatus:
+      type: string
+      enum:
+        - SINGLE
+        - MARRIED
+        - DIVORCED
+        - WIDOWED
+      description: Семейный статус
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+      description: Статус заявки
+
+    EmploymentDto:
+      type: object
+      required:
+        - employmentStatus
+        - employerINN
+        - salary
+        - position
+        - workExperienceTotal
+        - workExperienceCurrent
+      properties:
+        employmentStatus:
+          $ref: '#/components/schemas/EmploymentStatus'
+        employerINN:
+          type: string
+          pattern: '^[0-9]{10}$'
+          description: ИНН работодателя, 10 цифр
+        salary:
+          type: number
+          minimum: 0
+          description: Зарплата клиента
+        position:
+          $ref: '#/components/schemas/Position'
+        workExperienceTotal:
+          type: integer
+          minimum: 18
+          description: Общий стаж в месяцах, ≥ 18 (иначе отказ)
+        workExperienceCurrent:
+          type: integer
+          minimum: 3
+          description: Стаж на текущей работе в месяцах, ≥ 3 (иначе отказ)
+
+    LoanStatementRequestDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PersonInfoDto'
+      required:
+        - amount
+        - term
+        - email
+      properties:
+        amount:
+          type: number
+          format: decimal
+          minimum: 20000
+          description: Сумма кредита, >20000
+        term:
+          type: integer
+          minimum: 6
+          description: Срок кредита в месяцах, минимум 6
+        email:
+          type: string
+          format: email
+
+    LoanOfferDto:
+      type: object
+      required:
+        - statementId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: Идентификатор заявки (UUID)
+        requestedAmount:
+          type: number
+          format: decimal
+          description: Запрошенная сумма
+        totalAmount:
+          type: number
+          format: decimal
+        term:
+          type: integer
+          description: Срок кредита в месяцах
+        monthlyPayment:
+          type: number
+          format: decimal
+          description: Ежемесячный платёж
+        rate:
+          type: number
+          format: decimal
+          description: Процентная ставка (годовая)
+        isInsuranceEnabled:
+          type: boolean
+          description: Страхование подключено
+        isSalaryClient:
+          type: boolean
+          description: Зарплатный клиент
+
+    ScoringDataDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PersonInfoDto'
+      required:
+        - amount
+        - term
+        - gender
+        - passportIssueDate
+        - passportIssueBranch
+        - maritalStatus
+        - dependentAmount
+        - employment
+        - accountNumber
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        amount:
+          type: number
+          minimum: 20000
+          description: Запрошенная сумма кредита, ≥ 20000
+        term:
+          type: integer
+          minimum: 6
+          description: Срок кредита в месяцах, ≥ 6
+        gender:
+          $ref: '#/components/schemas/Gender'
+        passportIssueDate:
+          type: string
+          format: date
+          description: Дата выдачи паспорта
+        passportIssueBranch:
+          type: string
+          description: Подразделение, выдавшее паспорт
+        maritalStatus:
+          $ref: '#/components/schemas/MaritalStatus'
+        dependentAmount:
+          type: integer
+          minimum: 0
+          description: Количество иждивенцев
+        employment:
+          $ref: '#/components/schemas/EmploymentDto'
+        accountNumber:
+          type: string
+          description: Номер банковского счета
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+
+    CreditDto:
+      type: object
+      required:
+        - amount
+        - term
+        - monthlyPayment
+        - rate
+        - psk
+        - isInsuranceEnabled
+        - isSalaryClient
+        - paymentSchedule
+      properties:
+        amount:
+          type: number
+          description: Сумма кредита
+        term:
+          type: integer
+          description: Срок кредита
+        monthlyPayment:
+          type: number
+          description: Ежемесячный платёж
+        rate:
+          type: number
+          description: Процентная ставка
+        psk:
+          type: number
+          description: Полная стоимость кредита (ПСК)
+        isInsuranceEnabled:
+          type: boolean
+        isSalaryClient:
+          type: boolean
+        paymentSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentScheduleElementDto'
+
+    PaymentScheduleElementDto:
+      type: object
+      required:
+        - number
+        - date
+        - totalPayment
+        - interestPayment
+        - debtPayment
+        - remainingDebt
+      properties:
+        number:
+          type: integer
+          description: Номер платежа в графике
+        date:
+          type: string
+          format: date
+          description: Дата платежа
+        totalPayment:
+          type: number
+        interestPayment:
+          type: number
+        debtPayment:
+          type: number
+        remainingDebt:
+          type: number
+
+    StatementStatusHistoryDto:
+      type: object
+      required:
+        - status
+        - time
+        - changeType
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        time:
+          type: string
+          format: date-time
+        changeType:
+          $ref: '#/components/schemas/ChangeType'
+
+    FinishRegistrationRequestDto:
+      type: object
+      required:
+        - gender
+        - maritalStatus
+        - dependentAmount
+        - passportIssueDate
+        - passportIssueBranch
+        - employment
+        - accountNumber
+      properties:
+        gender:
+          $ref: '#/components/schemas/Gender'
+        maritalStatus:
+          $ref: '#/components/schemas/MaritalStatus'
+        dependentAmount:
+          type: integer
+        passportIssueDate:
+          type: string
+          format: date
+        passportIssueBranch:
+          type: string
+        employment:
+          $ref: '#/components/schemas/EmploymentDto'
+        accountNumber:
+          type: string
+
+
+
