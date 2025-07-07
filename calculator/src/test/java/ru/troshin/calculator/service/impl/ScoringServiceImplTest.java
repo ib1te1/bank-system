@@ -3,6 +3,7 @@ package ru.troshin.calculator.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.troshin.calculator.dto.*;
+import ru.troshin.calculator.exception.ScoringRejectedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,7 +37,7 @@ class ScoringServiceImplTest {
         emp.setEmploymentStatus(EmploymentStatus.EMPLOYED);
         emp.setEmployerINN("1234567890");
         emp.setSalary(BigDecimal.valueOf(1000));
-        emp.setPosition(Position.STAFF);
+        emp.setEmploymentPosition(EmploymentPosition.WORKER);
         emp.setWorkExperienceTotal(24);
         emp.setWorkExperienceCurrent(12);
         dto.setEmployment(emp);
@@ -53,7 +54,7 @@ class ScoringServiceImplTest {
     void calculateRate_unemployed_throws() {
         ScoringDataDto dto = baseDto();
         dto.getEmployment().setEmploymentStatus(EmploymentStatus.UNEMPLOYED);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("безработный"));
     }
@@ -62,7 +63,7 @@ class ScoringServiceImplTest {
     void calculateRate_tooYoung_throws() {
         ScoringDataDto dto = baseDto();
         dto.setBirthdate(LocalDate.now(ZONE).minusYears(19));
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("возраст"));
     }
@@ -71,7 +72,7 @@ class ScoringServiceImplTest {
     void calculateRate_tooOld_throws() {
         ScoringDataDto dto = baseDto();
         dto.setBirthdate(LocalDate.now(ZONE).minusYears(66));
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("возраст"));
     }
@@ -80,7 +81,7 @@ class ScoringServiceImplTest {
     void calculateRate_insufficientTotalExp_throws() {
         ScoringDataDto dto = baseDto();
         dto.getEmployment().setWorkExperienceTotal(17);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("общий стаж"));
     }
@@ -89,7 +90,7 @@ class ScoringServiceImplTest {
     void calculateRate_insufficientCurrentExp_throws() {
         ScoringDataDto dto = baseDto();
         dto.getEmployment().setWorkExperienceCurrent(2);
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("текущий стаж"));
     }
@@ -99,7 +100,7 @@ class ScoringServiceImplTest {
         ScoringDataDto dto = baseDto();
         dto.getEmployment().setSalary(BigDecimal.valueOf(1000));
         dto.setAmount(BigDecimal.valueOf(1000 * 25L));
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        ScoringRejectedException ex = assertThrows(ScoringRejectedException.class,
                 () -> scoringService.calculateRate(dto, BigDecimal.valueOf(10)));
         assertTrue(ex.getMessage().contains("слишком велика"));
     }
@@ -151,12 +152,12 @@ class ScoringServiceImplTest {
         dto.setBirthdate(LocalDate.now(ZONE).minusYears(29));
         dto.setMaritalStatus(MaritalStatus.SINGLE);
 
-        dto.getEmployment().setPosition(Position.MIDDLE_MANAGER);
+        dto.getEmployment().setEmploymentPosition(EmploymentPosition.MID_MANAGER);
         BigDecimal rate1 = scoringService.calculateRate(dto, baseRate);
         BigDecimal expected1 = baseRate.add(BigDecimal.valueOf(-2));
         assertEquals(0, rate1.compareTo(expected1));
 
-        dto.getEmployment().setPosition(Position.TOP_MANAGER);
+        dto.getEmployment().setEmploymentPosition(EmploymentPosition.TOP_MANAGER);
         BigDecimal rate2 = scoringService.calculateRate(dto, baseRate);
         BigDecimal expected2 = baseRate.add(BigDecimal.valueOf(-3));
         assertEquals(0, rate2.compareTo(expected2));
