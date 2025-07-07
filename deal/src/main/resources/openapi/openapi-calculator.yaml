@@ -185,6 +185,7 @@ components:
           type: string
           minLength: 2
           maxLength: 30
+          #          nullable: true
           description: Отчество(опционально)
           pattern: '^[A-Za-z]+$'
         birthdate:

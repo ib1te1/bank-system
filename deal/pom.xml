@@ -105,8 +105,8 @@
                             <inputSpec>${project.basedir}/src/main/resources/openapi/openapi-calculator.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi/calculator</output>
-                            <apiPackage>ru.troshin.deal.calcapi</apiPackage>
-                            <modelPackage>ru.troshin.deal.calcdto</modelPackage>
+                            <apiPackage>ru.troshin.deal.calculator.controller</apiPackage>
+                            <modelPackage>ru.troshin.deal.calculator.dto</modelPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>true</useBeanValidation>
@@ -128,8 +128,8 @@
                             <generatorName>spring</generatorName>
                             <library>spring-http-interface</library>
                             <output>${project.build.directory}/generated-sources/openapi/deal</output>
-                            <apiPackage>ru.troshin.deal.dealapi</apiPackage>
-                            <modelPackage>ru.troshin.deal.dealdto</modelPackage>
+                            <apiPackage>ru.troshin.deal.controller</apiPackage>
+                            <modelPackage>ru.troshin.deal.dto</modelPackage>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>true</useBeanValidation>
