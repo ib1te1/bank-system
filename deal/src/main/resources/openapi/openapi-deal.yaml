@@ -6,6 +6,8 @@ info:
 paths:
   /deal/statement:
     post:
+      tags:
+        - deal
       summary: Создать заявку и получить кредитные предложения
       requestBody:
         required: true
@@ -23,6 +25,8 @@ paths:
 
   /deal/offer/select:
     post:
+      tags:
+        - deal
       summary: Выбрать одно из предложений
       requestBody:
         required: true
@@ -39,6 +43,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /deal/calculate/{statementId}:
     post:
+      tags:
+        - deal
       summary: Завершить регистрацию и рассчитать кредит
       parameters:
         - name: statementId
@@ -47,7 +53,7 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
+#            format: uuid
       requestBody:
         required: true
         content:
@@ -175,11 +181,12 @@ components:
 
     EmploymentPosition:
       type: string
-      enum:
-        - STAFF
-        - MIDDLE_MANAGER
-        - TOP_MANAGER
       description: Должность клиента
+      enum:
+        - WORKER
+        - MID_MANAGER
+        - TOP_MANAGER
+        - OWNER
 
     ChangeType:
       type: string
@@ -201,7 +208,7 @@ components:
         - SINGLE
         - MARRIED
         - DIVORCED
-        - WIDOWED
+        - WIDOW_WIDOWER
       description: Семейный статус
 
     ApplicationStatus:
@@ -224,7 +231,7 @@ components:
         - employmentStatus
         - employerINN
         - salary
-        - position
+        - employmentPosition
         - workExperienceTotal
         - workExperienceCurrent
       properties:
@@ -238,8 +245,8 @@ components:
           type: number
           minimum: 0
           description: Зарплата клиента
-        position:
-          $ref: '#/components/schemas/Position'
+        employmentPosition:
+          $ref: '#/components/schemas/EmploymentPosition'
         workExperienceTotal:
           type: integer
           minimum: 18

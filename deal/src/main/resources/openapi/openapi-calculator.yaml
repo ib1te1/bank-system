@@ -143,7 +143,7 @@ components:
         - SINGLE
         - MARRIED
         - DIVORCED
-        - WIDOWED
+        - WIDOW_WIDOWER
 
     EmploymentStatus:
       type: string
@@ -154,13 +154,14 @@ components:
         - BUSINESS_OWNER
         - EMPLOYED
 
-    Position:
+    EmploymentPosition:
       type: string
       description: Должность клиента
       enum:
-        - STAFF
-        - MIDDLE_MANAGER
+        - WORKER
+        - MID_MANAGER
         - TOP_MANAGER
+        - OWNER
 
     PersonInfoDto:
       type: object
@@ -353,7 +354,7 @@ components:
         - employmentStatus
         - employerINN
         - salary
-        - position
+        - employmentPosition
         - workExperienceTotal
         - workExperienceCurrent
       properties:
@@ -367,8 +368,8 @@ components:
           type: number
           minimum: 0
           description: Зарплата клиента
-        position:
-          $ref: '#/components/schemas/Position'
+        employmentPosition:
+          $ref: '#/components/schemas/EmploymentPosition'
         workExperienceTotal:
           type: integer
           minimum: 18

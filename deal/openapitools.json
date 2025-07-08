@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.14.0",
+    "generators": {
+      "calc": {
+        "generatorName": "markdown",
+        "glob": "./src/main/resources/openapi/openapi-calculator.yaml",
+        "output": "./doc/calculator"
+      },
+      "deal": {
+        "generatorName": "markdown",
+        "glob": "./src/main/resources/openapi/openapi-deal.yaml",
+        "output": "./doc/deal"
+      }
+    }
+  }
+}
