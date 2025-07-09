@@ -2,6 +2,7 @@ package ru.troshin.deal.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import ru.troshin.deal.calculator.dto.ScoringDataDto;
 import ru.troshin.deal.dto.LoanOfferDto;
@@ -13,23 +14,27 @@ public interface ScoringMapper {
     ScoringDataDto toCalcScoring(ru.troshin.deal.dto.ScoringDataDto dealDto);
 
     @Mappings({
-            @Mapping(target = "amount",               source = "offer.requestedAmount"),
-            @Mapping(target = "term",                 source = "offer.term"),
-            @Mapping(target = "firstName",            source = "client.firstName"),
-            @Mapping(target = "lastName",             source = "client.lastName"),
-            @Mapping(target = "middleName",           source = "client.middleName"),
-            @Mapping(target = "gender",               source = "client.gender"),
-            @Mapping(target = "birthdate",            source = "client.birthDate"),
-            @Mapping(target = "passportSeries",       source = "client.passport.series"),
-            @Mapping(target = "passportNumber",       source = "client.passport.number"),
-            @Mapping(target = "passportIssueDate",    source = "client.passport.issueDate"),
-            @Mapping(target = "passportIssueBranch",  source = "client.passport.issueBranch"),
-            @Mapping(target = "maritalStatus",        source = "client.maritalStatus"),
-            @Mapping(target = "dependentAmount",      source = "client.dependentAmount"),
-            @Mapping(target = "employment",           source = "client.employment"),
-            @Mapping(target = "accountNumber",        source = "client.accountNumber"),
-            @Mapping(target = "isInsuranceEnabled",   source = "offer.isInsuranceEnabled"),
-            @Mapping(target = "isSalaryClient",       source = "offer.isSalaryClient")
+            @Mapping(target = "firstName",          source = "firstName"),
+            @Mapping(target = "lastName",           source = "lastName"),
+            @Mapping(target = "middleName",         source = "middleName"),
+            @Mapping(target = "gender",             source = "gender"),
+            @Mapping(target = "birthdate",          source = "birthDate"),
+            @Mapping(target = "passportSeries",     source = "passport.series"),
+            @Mapping(target = "passportNumber",     source = "passport.number"),
+            @Mapping(target = "passportIssueDate",  source = "passport.issueDate"),
+            @Mapping(target = "passportIssueBranch",source = "passport.issueBranch"),
+            @Mapping(target = "maritalStatus",      source = "maritalStatus"),
+            @Mapping(target = "dependentAmount",    source = "dependentAmount"),
+            @Mapping(target = "employment",         source = "employment"),
+            @Mapping(target = "accountNumber",      source = "accountNumber")
     })
-    ru.troshin.deal.dto.ScoringDataDto toDealScoring(Client client, LoanOfferDto offer);
+    ru.troshin.deal.dto.ScoringDataDto toDealScoring(Client client);
+
+    @Mappings({
+            @Mapping(target = "amount",               source = "requestedAmount"),
+            @Mapping(target = "term",                 source = "term"),
+            @Mapping(target = "isInsuranceEnabled",   source = "isInsuranceEnabled"),
+            @Mapping(target = "isSalaryClient",       source = "isSalaryClient")
+    })
+    void updateScoring(LoanOfferDto offer, @MappingTarget ru.troshin.deal.dto.ScoringDataDto scoring);
 }

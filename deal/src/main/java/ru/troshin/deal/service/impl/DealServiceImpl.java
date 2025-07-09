@@ -128,7 +128,9 @@ public class DealServiceImpl implements DealService {
     private ScoringDataDto buildScoringData(Statement stmt) {
         Client c = stmt.getClient();
         var offer = stmt.getAppliedOffer();
-        return scoringMapper.toDealScoring(c,offer);
+        var scoring=scoringMapper.toDealScoring(c);
+        scoringMapper.updateScoring(offer,scoring);
+        return scoring;
     }
 
     private Credit callCalculatorAndSaveCredit(ScoringDataDto scoringData) {
