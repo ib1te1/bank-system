@@ -33,6 +33,7 @@ build/
 .vscode/
 
 .mvn/
+.mvn/wrapper
 mvnw
 mvnw.cmd
 
@@ -43,3 +44,6 @@ doc/deal/.openapi-generator
 doc/deal/.openapi-generator-ignore
 
 src/main/resources/openapi/templates
+
+.gitattributes
+openapitools.json

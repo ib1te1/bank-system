@@ -18,10 +18,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Passport {
 
-    @Pattern(regexp = "^[0-9]{4}$")
     private String series;
 
-    @Pattern(regexp = "^[0-9]{6}$")
     private String number;
 
     private String issueBranch;

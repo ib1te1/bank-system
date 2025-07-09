@@ -128,24 +128,7 @@ public class DealServiceImpl implements DealService {
     private ScoringDataDto buildScoringData(Statement stmt) {
         Client c = stmt.getClient();
         var offer = stmt.getAppliedOffer();
-        return new ScoringDataDto()
-                .amount(offer.getRequestedAmount())
-                .term(offer.getTerm())
-                .firstName(c.getFirstName())
-                .lastName(c.getLastName())
-                .middleName(c.getMiddleName())
-                .gender(c.getGender())
-                .birthdate(c.getBirthDate())
-                .passportSeries(c.getPassport().getSeries())
-                .passportNumber(c.getPassport().getNumber())
-                .passportIssueDate(c.getPassport().getIssueDate())
-                .passportIssueBranch(c.getPassport().getIssueBranch())
-                .maritalStatus(c.getMaritalStatus())
-                .dependentAmount(c.getDependentAmount())
-                .employment(employmentMapper.toDto(stmt.getClient().getEmployment()))
-                .accountNumber(c.getAccountNumber())
-                .isInsuranceEnabled(offer.getIsInsuranceEnabled())
-                .isSalaryClient(offer.getIsSalaryClient());
+        return scoringMapper.toDealScoring(c,offer);
     }
 
     private Credit callCalculatorAndSaveCredit(ScoringDataDto scoringData) {

@@ -81,12 +81,6 @@
             <version>1.5.3.Final</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>1.5.3.Final</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

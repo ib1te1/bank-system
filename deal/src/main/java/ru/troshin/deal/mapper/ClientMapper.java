@@ -11,6 +11,7 @@ import ru.troshin.deal.entity.Passport;
 public interface ClientMapper {
 
     @Mapping(source = "birthdate", target = "birthDate")
-    @Mapping(target = "passport", expression = "java(new Passport(req.getPassportSeries(),req.getPassportNumber(),null,null))")
+    @Mapping(target = "passport.series", source = "passportSeries")
+    @Mapping(target = "passport.number", source = "passportNumber")
     Client toClientFromLoan(LoanStatementRequestDto req);
 }
