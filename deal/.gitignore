@@ -37,11 +37,8 @@ build/
 mvnw
 mvnw.cmd
 
-doc/calculator/.openapi-generator
-doc/calculator/.openapi-generator-ignore
-
-doc/deal/.openapi-generator
-doc/deal/.openapi-generator-ignore
+doc/.openapi-generator
+doc/.openapi-generator-ignore
 
 src/main/resources/openapi/templates
 
