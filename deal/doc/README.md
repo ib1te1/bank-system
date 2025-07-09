@@ -1,4 +1,4 @@
-# Documentation for Calculator Service API
+# Documentation for Deal Service API
 
 <a name="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
@@ -7,18 +7,22 @@ All URIs are relative to *http://localhost*
 
 | Class | Method | HTTP request | Description |
 |------------ | ------------- | ------------- | -------------|
-| *DefaultApi* | [**calculatorCalcPost**](Apis/DefaultApi.md#calculatorcalcpost) | **POST** /calculator/calc | Валидация присланных данных, скоринг данных и полный расчет параметров кредита |
-*DefaultApi* | [**calculatorOffersPost**](Apis/DefaultApi.md#calculatorofferspost) | **POST** /calculator/offers | Расчёт возможных условий кредита |
+| *DealApi* | [**dealCalculateStatementIdPost**](Apis/DealApi.md#dealcalculatestatementidpost) | **POST** /deal/calculate/{statementId} | Завершить регистрацию и рассчитать кредит |
+*DealApi* | [**dealOfferSelectPost**](Apis/DealApi.md#dealofferselectpost) | **POST** /deal/offer/select | Выбрать одно из предложений |
+*DealApi* | [**dealStatementPost**](Apis/DealApi.md#dealstatementpost) | **POST** /deal/statement | Создать заявку и получить кредитные предложения |
 
 
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [ApplicationStatus](./Models/ApplicationStatus.md)
+ - [ChangeType](./Models/ChangeType.md)
  - [ClientError](./Models/ClientError.md)
  - [CreditDto](./Models/CreditDto.md)
  - [EmploymentDto](./Models/EmploymentDto.md)
  - [EmploymentPosition](./Models/EmploymentPosition.md)
  - [EmploymentStatus](./Models/EmploymentStatus.md)
+ - [FinishRegistrationRequestDto](./Models/FinishRegistrationRequestDto.md)
  - [Gender](./Models/Gender.md)
  - [LoanOfferDto](./Models/LoanOfferDto.md)
  - [LoanStatementRequestDto](./Models/LoanStatementRequestDto.md)
@@ -27,7 +31,7 @@ All URIs are relative to *http://localhost*
  - [PersonInfoDto](./Models/PersonInfoDto.md)
  - [ScoringDataDto](./Models/ScoringDataDto.md)
  - [ServerError](./Models/ServerError.md)
- - [UnexpectedError](./Models/UnexpectedError.md)
+ - [StatementStatusHistoryDto](./Models/StatementStatusHistoryDto.md)
 
 
 <a name="documentation-for-authorization"></a>
