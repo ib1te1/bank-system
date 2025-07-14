@@ -6,6 +6,8 @@ info:
 paths:
   /calculator/offers:
     post:
+      tags:
+        - calculator
       summary: Расчёт возможных условий кредита
       requestBody:
         required: true
@@ -24,6 +26,8 @@ paths:
 
   /calculator/calc:
     post:
+      tags:
+        - calculator
       summary: Валидация присланных данных, скоринг данных и полный расчет параметров кредита
       requestBody:
         required: true
