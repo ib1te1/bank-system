@@ -54,10 +54,10 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public void selectOffer(LoanOfferDto offer) {
-        log.info("Selecting offer {}", offer.getStatementId());
+        log.info("Selecting offer for statement {}", offer.getStatementId());
         Statement statement = findStatementOrThrow(offer.getStatementId());
         updateStatementWithOffer(offer, statement);
-        log.info("Offer selected, statement {} updated to status {}", statement.getId(), statement.getStatus());
+        log.info("Selected offer - {}, statement {} updated to status {}", statement.getAppliedOffer(),statement.getId(), statement.getStatus());
     }
 
     @Override
@@ -66,10 +66,11 @@ public class DealServiceImpl implements DealService {
         Statement statement = findStatementOrThrow(UUID.fromString(statementId));
 
         updateClientFinishData(statement.getClient(), finishDto);
+        log.info("Credit calculated for statement {}", finishDto);
         log.debug("Client data updated for client ID: {}", statement.getClient().getId());
 
         ScoringDataDto scoring = buildScoringData(statement);
-        log.debug("Scoring data built: {}", scoring);
+        log.info("Scoring data built: {}", scoring.getGender());
 
         Credit credit = callCalculatorAndSaveCredit(scoring);
         log.info("Credit calculated with ID: {}", credit.getId());
@@ -122,6 +123,9 @@ public class DealServiceImpl implements DealService {
         client.setPassport(passport);
         client.setEmployment(employmentMapper.toEmployment(dto.getEmployment()));
         client.setAccountNumber(dto.getAccountNumber());
+        client.setGender(dto.getGender());
+        client.setMaritalStatus(dto.getMaritalStatus());
+        client.setDependentAmount(dto.getDependentAmount());
         clientRepository.save(client);
     }
 
@@ -134,7 +138,9 @@ public class DealServiceImpl implements DealService {
     }
 
     private Credit callCalculatorAndSaveCredit(ScoringDataDto scoringData) {
+        log.info("Gender полученный: {}", scoringData.getGender());
         var calcScoring = scoringMapper.toCalcScoring(scoringData);
+        log.info("Gender перед отправкой: {}", calcScoring.getGender());
         var calcCredit = calculatorApi.calculatorCalcPost(calcScoring).getBody();
         CreditDto creditDto = creditMapper.toDealCredit(calcCredit);
 

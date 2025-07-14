@@ -98,6 +98,7 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/openapi-calculator.yaml</inputSpec>
                             <generatorName>spring</generatorName>
+                            <library>spring-http-interface</library>
                             <output>${project.build.directory}/generated-sources/openapi/calculator</output>
                             <apiPackage>ru.troshin.deal.calculator.controller</apiPackage>
                             <modelPackage>ru.troshin.deal.calculator.dto</modelPackage>
@@ -120,7 +121,7 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/openapi-deal.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <library>spring-http-interface</library>
+
                             <output>${project.build.directory}/generated-sources/openapi/deal</output>
                             <apiPackage>ru.troshin.deal.controller</apiPackage>
                             <modelPackage>ru.troshin.deal.dto</modelPackage>
