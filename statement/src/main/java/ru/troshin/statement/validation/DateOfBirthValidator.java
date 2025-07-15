@@ -1,10 +1,11 @@
-package ru.troshin.calculator.validation;
+package ru.troshin.statement.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDate;
 import java.time.Period;
+
 
 public class DateOfBirthValidator implements ConstraintValidator<DateOfBirth, LocalDate> {
 
@@ -13,13 +14,13 @@ public class DateOfBirthValidator implements ConstraintValidator<DateOfBirth, Lo
 
     @Override
     public void initialize(DateOfBirth annotation) {
-        this.minAge = annotation.minAge();
-        this.maxAge = annotation.maxAge();
+        minAge = annotation.minAge();
+        maxAge = annotation.maxAge();
     }
 
     @Override
     public boolean isValid(LocalDate localDate, ConstraintValidatorContext constraintValidatorContext) {
-        if(localDate == null) {
+        if (localDate == null) {
             return false;
         }
         LocalDate today = LocalDate.now();
@@ -27,6 +28,7 @@ public class DateOfBirthValidator implements ConstraintValidator<DateOfBirth, Lo
             return false;
         }
         int age = Period.between(localDate, today).getYears();
+
         return age >= minAge && age <= maxAge;
     }
 }

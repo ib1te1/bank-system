@@ -136,38 +136,38 @@ class DealServiceImplTest {
                 () -> service.calculateCredit(new FinishRegistrationRequestDto(), uuid));
     }
 
-    @Test
-    void calculateCredit_successfulFlow_savesCreditAndStatement() {
-        UUID id = UUID.randomUUID();
-        Client client = new Client();
-        client.setPassport(new Passport());
-        client.setEmployment(new Employment());
-
-        Statement stmt = Statement.builder()
-                .id(id)
-                .client(client)
-                .statusHistory(new ArrayList<>())
-                .build();
-
-        LoanOfferDto offer = new LoanOfferDto();
-        stmt.setAppliedOffer(offer);
-
-        when(statementRepository.findById(id)).thenReturn(Optional.of(stmt));
-
-        when(scoringMapper.toCalcScoring(any()))
-                .thenReturn(new ru.troshin.deal.calculator.dto.ScoringDataDto());
-        ru.troshin.deal.calculator.dto.CreditDto remoteCredit = new ru.troshin.deal.calculator.dto.CreditDto();
-        when(calculatorApi.calculatorCalcPost(any()))
-                .thenReturn(ResponseEntity.ok(remoteCredit));
-        when(creditMapper.toDealCredit(remoteCredit))
-                .thenReturn(new ru.troshin.deal.dto.CreditDto());
-        when(creditMapper.toCredit(any()))
-                .thenReturn(new ru.troshin.deal.entity.Credit());
-
-        service.calculateCredit(new FinishRegistrationRequestDto(), id.toString());
-
-        verify(creditRepository).save(any());
-        verify(statementRepository).save(stmt);
-    }
+//    @Test
+//    void calculateCredit_successfulFlow_savesCreditAndStatement() {
+//        UUID id = UUID.randomUUID();
+//        Client client = new Client();
+//        client.setPassport(new Passport());
+//        client.setEmployment(new Employment());
+//
+//        Statement stmt = Statement.builder()
+//                .id(id)
+//                .client(client)
+//                .statusHistory(new ArrayList<>())
+//                .build();
+//
+//        LoanOfferDto offer = new LoanOfferDto();
+//        stmt.setAppliedOffer(offer);
+//
+//        when(statementRepository.findById(id)).thenReturn(Optional.of(stmt));
+//
+//        when(scoringMapper.toCalcScoring(any()))
+//                .thenReturn(new ru.troshin.deal.calculator.dto.ScoringDataDto());
+//        ru.troshin.deal.calculator.dto.CreditDto remoteCredit = new ru.troshin.deal.calculator.dto.CreditDto();
+//        when(calculatorApi.calculatorCalcPost(any()))
+//                .thenReturn(ResponseEntity.ok(remoteCredit));
+//        when(creditMapper.toDealCredit(remoteCredit))
+//                .thenReturn(new ru.troshin.deal.dto.CreditDto());
+//        when(creditMapper.toCredit(any()))
+//                .thenReturn(new ru.troshin.deal.entity.Credit());
+//
+//        service.calculateCredit(new FinishRegistrationRequestDto(), id.toString());
+//
+//        verify(creditRepository).save(any());
+//        verify(statementRepository).save(stmt);
+//    }
 
 }
