@@ -46,7 +46,6 @@ public class GlobalExceptionHandler {
             log.error("Ошибка при разборе ответа внешнего сервиса", parseEx);
             return buildClientError("UNEXPECTED_ERROR", "Произошла неизвестная ошибка");
         }
-
     }
 
     private ResponseEntity<ClientError> buildClientError(String code, String message) {

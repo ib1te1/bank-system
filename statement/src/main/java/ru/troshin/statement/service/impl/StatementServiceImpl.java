@@ -10,6 +10,7 @@ import ru.troshin.statement.mapper.LoanOfferMapper;
 import ru.troshin.statement.mapper.LoanReqMapper;
 import ru.troshin.statement.service.StatementService;
 
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -31,9 +32,11 @@ public class StatementServiceImpl implements StatementService {
     @Override
     public List<LoanOfferDto> createStatement(LoanStatementRequestDto req) {
         log.info("Creating statement from Statement service for client: {} {}", req.getFirstName(), req.getLastName());
-        var list = dealApi.dealStatementPost(loanReqMapper.toDealLoanReq(req)).getBody();
-        return list.stream()
+        var offers = dealApi.dealStatementPost(loanReqMapper.toDealLoanReq(req)).getBody();
+        return offers.stream()
                 .map(loanOfferMapper::toStatementOffer)
+                .sorted(Comparator.comparing(LoanOfferDto::getRate,
+                        Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .toList();
     }
 }

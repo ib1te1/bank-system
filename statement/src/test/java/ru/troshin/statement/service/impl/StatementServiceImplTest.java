@@ -3,8 +3,6 @@ package ru.troshin.statement.service.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +17,8 @@ import ru.troshin.statement.mapper.LoanReqMapper;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -36,12 +35,6 @@ class StatementServiceImplTest {
 
     @InjectMocks
     private StatementServiceImpl service;
-
-    @Captor
-    private ArgumentCaptor<ru.troshin.statement.deal.dto.LoanOfferDto> offerDtoCaptor;
-
-    @Captor
-    private ArgumentCaptor<ru.troshin.statement.deal.dto.LoanStatementRequestDto> reqDtoCaptor;
 
     private LoanOfferDto inputOffer;
     private ru.troshin.statement.deal.dto.LoanOfferDto mappedDealOffer;
@@ -74,20 +67,22 @@ class StatementServiceImplTest {
 
     @Test
     void selectOffer_ShouldCallDealApiWithMappedDto() {
+        // Act
         service.selectOffer(inputOffer);
 
+        // Assert
         verify(loanOfferMapper).toDealDto(inputOffer);
-        verify(dealApi).dealOfferSelectPost(offerDtoCaptor.capture());
-        assertThat(offerDtoCaptor.getValue()).isSameAs(mappedDealOffer);
+        verify(dealApi).dealOfferSelectPost(mappedDealOffer);
     }
 
     @Test
     void createStatement_ShouldReturnMappedOffers() {
+        // Act
         List<LoanOfferDto> result = service.createStatement(inputReq);
 
+        // Assert
         verify(loanReqMapper).toDealLoanReq(inputReq);
-        verify(dealApi).dealStatementPost(reqDtoCaptor.capture());
-        assertThat(reqDtoCaptor.getValue()).isSameAs(mappedDealReq);
+        verify(dealApi).dealStatementPost(mappedDealReq);
 
         assertThat(result)
                 .hasSize(2)

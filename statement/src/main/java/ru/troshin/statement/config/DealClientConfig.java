@@ -15,7 +15,7 @@ public class DealClientConfig {
     private final DealProperties dealProperties;
 
     @Bean
-    public DealApi dealApi() {
+    public DealApi dealClient() {
         RestClient restClient = RestClient.builder()
                 .baseUrl(dealProperties.getUrl())
                 .build();
