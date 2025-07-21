@@ -65,9 +65,11 @@ class StatementServiceImplTest {
 
         outOffer1 = new LoanOfferDto();
         outOffer1.setRate(BigDecimal.valueOf(9.5));
+        outOffer1.setTotalAmount(BigDecimal.valueOf(200000));
 
         outOffer2 = new LoanOfferDto();
         outOffer2.setRate(BigDecimal.valueOf(7.3));
+        outOffer2.setTotalAmount(BigDecimal.valueOf(250000));
         when(loanOfferMapper.toStatementOffer(same(dealOffer1))).thenReturn(outOffer1);
         when(loanOfferMapper.toStatementOffer(same(dealOffer2))).thenReturn(outOffer2);
     }
