@@ -14,11 +14,13 @@ import ru.troshin.statement.dto.LoanStatementRequestDto;
 import ru.troshin.statement.mapper.LoanOfferMapper;
 import ru.troshin.statement.mapper.LoanReqMapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.same;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -55,32 +57,33 @@ class StatementServiceImplTest {
         when(loanReqMapper.toDealLoanReq(inputReq)).thenReturn(mappedDealReq);
 
         dealOffer1 = new ru.troshin.statement.deal.dto.LoanOfferDto();
+        dealOffer1.setRate(BigDecimal.valueOf(1));
         dealOffer2 = new ru.troshin.statement.deal.dto.LoanOfferDto();
+        dealOffer2.setRate(BigDecimal.valueOf(2));
         when(dealApi.dealStatementPost(mappedDealReq))
                 .thenReturn(ResponseEntity.ok(List.of(dealOffer1, dealOffer2)));
 
         outOffer1 = new LoanOfferDto();
+        outOffer1.setRate(BigDecimal.valueOf(9.5));
+
         outOffer2 = new LoanOfferDto();
-        when(loanOfferMapper.toStatementOffer(dealOffer1)).thenReturn(outOffer1);
-        when(loanOfferMapper.toStatementOffer(dealOffer2)).thenReturn(outOffer2);
+        outOffer2.setRate(BigDecimal.valueOf(7.3));
+        when(loanOfferMapper.toStatementOffer(same(dealOffer1))).thenReturn(outOffer1);
+        when(loanOfferMapper.toStatementOffer(same(dealOffer2))).thenReturn(outOffer2);
     }
 
     @Test
     void selectOffer_ShouldCallDealApiWithMappedDto() {
-        // Act
         service.selectOffer(inputOffer);
 
-        // Assert
         verify(loanOfferMapper).toDealDto(inputOffer);
         verify(dealApi).dealOfferSelectPost(mappedDealOffer);
     }
 
     @Test
     void createStatement_ShouldReturnMappedOffers() {
-        // Act
         List<LoanOfferDto> result = service.createStatement(inputReq);
 
-        // Assert
         verify(loanReqMapper).toDealLoanReq(inputReq);
         verify(dealApi).dealStatementPost(mappedDealReq);
 

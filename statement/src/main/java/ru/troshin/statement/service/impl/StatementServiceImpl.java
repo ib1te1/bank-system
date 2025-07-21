@@ -35,8 +35,7 @@ public class StatementServiceImpl implements StatementService {
         var offers = dealApi.dealStatementPost(loanReqMapper.toDealLoanReq(req)).getBody();
         return offers.stream()
                 .map(loanOfferMapper::toStatementOffer)
-                .sorted(Comparator.comparing(LoanOfferDto::getRate,
-                        Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .sorted(Comparator.comparing(LoanOfferDto::getRate).reversed())
                 .toList();
     }
 }
