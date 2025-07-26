@@ -1,10 +1,9 @@
-package ru.troshin.deal.validation;
+package ru.troshin.statement.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
-
 
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,9 +14,10 @@ public @interface DateOfBirth {
 
     Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload[]>[] payload() default {};
 
     int minAge() default 18;
 
     int maxAge() default 120;
+
 }

@@ -62,7 +62,6 @@ class CalculatorServiceImplTest {
 
         BigDecimal prevRate = offers.get(0).getRate();
         for (LoanOfferDto offer : offers) {
-//            assertNotNull(offer.getStatementId());
             assertEquals(dto.getAmount(), offer.getRequestedAmount());
             assertEquals(dto.getTerm(), offer.getTerm());
             assertTrue(prevRate.compareTo(offer.getRate()) >= 0);

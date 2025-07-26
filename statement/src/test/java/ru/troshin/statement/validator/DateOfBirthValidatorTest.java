@@ -1,11 +1,12 @@
-package ru.troshin.calculator.validator;
+package ru.troshin.statement.validator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import ru.troshin.calculator.validation.DateOfBirth;
-import ru.troshin.calculator.validation.DateOfBirthValidator;
+import ru.troshin.statement.validation.DateOfBirth;
+import ru.troshin.statement.validation.DateOfBirthValidator;
+
 
 import java.time.LocalDate;
 

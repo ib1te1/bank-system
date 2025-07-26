@@ -1,0 +1,205 @@
+openapi: 3.0.3
+info:
+  title: Statement Service API
+  version: 0.0.1
+servers:
+  - url: http://localhost:8082
+paths:
+  /statement:
+    post:
+      tags:
+        - statement
+      summary: Прескоринг + запрос на расчёт возможных условий кредита.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanStatementRequestDto'
+      responses:
+        200:
+          $ref: '#/components/responses/SuccessOffers'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /statement/offer:
+    post:
+      tags:
+        - statement
+      summary: Выбор одного из предложений.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDto'
+      responses:
+        204:
+          $ref: '#/components/responses/NoContentRequest'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+
+  responses:
+
+    NoContentRequest:
+      description:  Оффер выбран, состояние заявки обновлено
+
+    SuccessOffers:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/LoanOfferDto'
+      description: Список кредитных предложений
+
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ClientError"
+      description: Ошибка клиента
+
+    InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServerError"
+      description: Ошибка сервера
+
+
+  schemas:
+
+
+    ClientError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INVALID_REQUEST"
+        message:
+          type: string
+          example: "Поле amount должно быть ≥ 20000"
+      description: Ошибка на стороне клиента
+
+    ServerError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "INTERNAL_ERROR"
+        message:
+          type: string
+          example: "Ошибка при генерации предложений по кредиту"
+      description: Внутренняя ошибка сервера при обработке запроса
+
+    PersonInfoDto:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - birthdate
+        - passportNumber
+        - passportSeries
+      properties:
+        firstName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        lastName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+        middleName:
+          type: string
+          minLength: 2
+          maxLength: 30
+          pattern: '^[A-Za-z]+$'
+          description: Отчество(опционально)
+        birthdate:
+          type: string
+          format: date
+          x-field-extra-annotation: '@DateOfBirth'
+          example: "1990-08-15"
+        passportSeries:
+          type: string
+          pattern: '^[0-9]{4}$'
+        passportNumber:
+          type: string
+          pattern: '^[0-9]{6}$'
+
+    LoanStatementRequestDto:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/PersonInfoDto"
+      required:
+        - amount
+        - term
+        - email
+      properties:
+        amount:
+          type: number
+          format: decimal
+          minimum: 20000
+          description: Сумма кредита, >20000
+        term:
+          type: integer
+          minimum: 6
+          description: Срок кредита в месяцах, минимум 6
+        email:
+          type: string
+          format: email
+
+    LoanOfferDto:
+      type: object
+      required:
+        - statementId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: Идентификатор заявки (UUID)
+        requestedAmount:
+          type: number
+          format: decimal
+          description: Запрошенная сумма
+        totalAmount:
+          type: number
+          format: decimal
+        term:
+          type: integer
+          description: Срок кредита в месяцах
+        monthlyPayment:
+          type: number
+          format: decimal
+          description: Ежемесячный платёж
+        rate:
+          type: number
+          format: decimal
+          description: Процентная ставка (годовая)
+        isInsuranceEnabled:
+          type: boolean
+          description: Страхование подключено
+        isSalaryClient:
+          type: boolean
+          description: Зарплатный клиент

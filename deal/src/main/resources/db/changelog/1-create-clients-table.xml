@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="1-create-clients-table" author="auto-generated">
+        <createTable tableName="clients">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="middle_name" type="VARCHAR(255)"/>
+            <column name="birth_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="gender" type="VARCHAR(255)"/>
+            <column name="marital_status" type="VARCHAR(255)"/>
+            <column name="dependent_amount" type="INT"/>
+            <column name="passport" type="JSONB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employment" type="JSONB"/>
+            <column name="account_number" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="clients"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

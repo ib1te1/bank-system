@@ -87,9 +87,6 @@
                                 <useBeanValidation>true</useBeanValidation>
                                 <useJakartaEe>true</useJakartaEe>
                             </configOptions>
-                            <templateDirectory>
-                                ${project.basedir}/src/main/resources/openapi/templates
-                            </templateDirectory>
                         </configuration>
                     </execution>
                 </executions>

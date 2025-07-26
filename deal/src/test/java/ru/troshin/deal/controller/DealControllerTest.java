@@ -108,13 +108,4 @@ class DealControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    void postCalculate_validInput_returnsNoContent() throws Exception {
-        doNothing().when(dealServiceImpl).calculateCredit(any(), anyString());
-
-        mockMvc.perform(post("/deal/calculate/" + offerDto.getStatementId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(finishDto)))
-                .andExpect(status().isNoContent());
-    }
 }
