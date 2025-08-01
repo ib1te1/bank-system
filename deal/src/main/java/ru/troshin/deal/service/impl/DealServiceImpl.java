@@ -30,6 +30,8 @@ public class DealServiceImpl implements DealService {
     private final CreditRepository creditRepository;
     private final CalculatorApi calculatorApi;
 
+    private final EmailProducerServiceImpl emailProducerService;
+
     private final ClientMapper clientMapper;
     private final CreditMapper creditMapper;
     private final ScoringMapper scoringMapper;
@@ -53,11 +55,60 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    public void createDocuments(String statementId){
+        Statement statement=findStatementOrThrow(UUID.fromString(statementId));
+        statement.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
+        statementRepository.save(statement);
+        emailProducerService.send(new EmailMessage(
+                statement.getClient().getEmail(),
+                Theme.SEND_DOCUMENTS,
+                UUID.fromString(statementId),
+                "Документы"
+        ));
+        statement.setStatus(ApplicationStatus.DOCUMENT_CREATED);
+        statementRepository.save(statement);
+    }
+
+    @Override
+    public void signDocuments(String statementId){
+        Statement statement=findStatementOrThrow(UUID.fromString(statementId));
+        statement.setSes_code(UUID.randomUUID().toString());
+        statementRepository.save(statement);
+        emailProducerService.send(new EmailMessage(
+                statement.getClient().getEmail(),
+                Theme.SEND_SES,
+                UUID.fromString(statementId),
+                "Подпись документов"
+        ));
+    }
+
+    @Override
+    public void verifySesCode(String statementId){
+        Statement statement=findStatementOrThrow(UUID.fromString(statementId));
+        statement.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
+        statementRepository.save(statement);
+        statement.setStatus(ApplicationStatus.CREDIT_ISSUED);
+        statementRepository.save(statement);
+        emailProducerService.send(new EmailMessage(
+                statement.getClient().getEmail(),
+                Theme.CREDIT_ISSUED,
+                UUID.fromString(statementId),
+                "ссылка на подписание"
+        ));
+    }
+
+    @Override
     public void selectOffer(LoanOfferDto offer) {
         log.info("Selecting offer for statement {}", offer.getStatementId());
         Statement statement = findStatementOrThrow(offer.getStatementId());
         updateStatementWithOffer(offer, statement);
         log.info("Selected offer - {}, statement {} updated to status {}", statement.getAppliedOffer(),statement.getId(), statement.getStatus());
+        emailProducerService.send(new EmailMessage(
+                statement.getClient().getEmail(),
+                Theme.FINISH_REGISTRATION,
+                statement.getId(),
+                "Завершите оформление"
+        ));
     }
 
     @Override
@@ -77,6 +128,12 @@ public class DealServiceImpl implements DealService {
 
         finalizeStatementWithCredit(statement, credit);
         log.info("Statement {} finalized with credit status {}", statement.getId(), statement.getStatus());
+        emailProducerService.send(new EmailMessage(
+                statement.getClient().getEmail(),
+                Theme.CREATE_DOCUMENTS,
+                statement.getId(),
+                "Перейти к оформлению документов"
+        ));
     }
 
     private Client saveNewClient(LoanStatementRequestDto req) {
@@ -138,9 +195,7 @@ public class DealServiceImpl implements DealService {
     }
 
     private Credit callCalculatorAndSaveCredit(ScoringDataDto scoringData) {
-        log.info("Gender полученный: {}", scoringData.getGender());
         var calcScoring = scoringMapper.toCalcScoring(scoringData);
-        log.info("Gender перед отправкой: {}", calcScoring.getGender());
         var calcCredit = calculatorApi.calculatorCalcPost(calcScoring).getBody();
         CreditDto creditDto = creditMapper.toDealCredit(calcCredit);
 

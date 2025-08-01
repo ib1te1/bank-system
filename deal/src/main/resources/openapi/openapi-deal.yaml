@@ -67,9 +67,78 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
+  /deal/document/{statementId}/send:
+    post:
+      tags:
+        - deal
+      summary: Запрос на отправку документов клиенту
+      parameters:
+        - name: statementId
+          in: path
+          required: true
+          description: UUID заявки
+          schema:
+            type: string
+      responses:
+        '202':
+          $ref: '#/components/responses/NoContentDocumentRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /deal/document/{statementId}/sign:
+    post:
+      tags:
+        - deal
+      summary: Запрос на подписание документов (отправка кода SES)
+      parameters:
+        - name: statementId
+          in: path
+          required: true
+          description: UUID заявки
+          schema:
+            type: string
+      responses:
+        '202':
+          $ref: '#/components/responses/NoContentRequestApplied'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /deal/document/{statementId}/code:
+    post:
+      tags:
+        - deal
+      summary: Подтверждение кода для подписания документов и завершение подписи
+      parameters:
+        - name: statementId
+          in: path
+          required: true
+          description: UUID заявки
+          schema:
+            type: string
+      responses:
+        '202':
+          $ref: '#/components/responses/NoContentDocumentsProcessed'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
 
 components:
   responses:
+
+    NoContentDocumentsProcessed:
+      description: Код принят, документы подписаны и письмо отправлено
+
+    NoContentRequestApplied:
+      description: Запрос на подписание документов принят и код отправлен
+
+    NoContentDocumentRequest:
+      description: Запрос на подписание документов принят и код отправлен
 
     NoContentLoan:
       description: Кредит рассчитан и сохранён
@@ -102,6 +171,38 @@ components:
 
 
   schemas:
+
+    Theme:
+      type: string
+      enum:
+        - FINISH_REGISTRATION
+        - CREATE_DOCUMENTS
+        - SEND_DOCUMENTS
+        - SEND_SES
+        - CREDIT_ISSUED
+        - STATEMENT_DENIED
+      description: Тема письма, соответствует Kafka-топику
+
+    EmailMessage:
+      type: object
+      required:
+        - address
+        - theme
+        - statementId
+        - text
+      properties:
+        address:
+          type: string
+          format: email
+          description: Адрес почты
+        theme:
+          $ref: '#/components/schemas/Theme'
+        statementId:
+          type: string
+          format: uuid
+        text:
+          type: string
+          description: Текст письма
 
     ClientError:
       type: object
