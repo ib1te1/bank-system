@@ -62,7 +62,7 @@ public class DealServiceImpl implements DealService {
         emailProducerService.send(new EmailMessage(
                 statement.getClient().getEmail(),
                 Theme.SEND_DOCUMENTS,
-                UUID.fromString(statementId),
+                statement.getId(),
                 "Документы"
         ));
         statement.setStatus(ApplicationStatus.DOCUMENT_CREATED);
@@ -72,13 +72,13 @@ public class DealServiceImpl implements DealService {
     @Override
     public void signDocuments(String statementId){
         Statement statement=findStatementOrThrow(UUID.fromString(statementId));
-        statement.setSes_code(UUID.randomUUID().toString());
+        statement.setSesCode(UUID.randomUUID().toString());
         statementRepository.save(statement);
         emailProducerService.send(new EmailMessage(
                 statement.getClient().getEmail(),
                 Theme.SEND_SES,
-                UUID.fromString(statementId),
-                "Подпись документов"
+                statement.getId(),
+                "Подпись документов, sesCode: " + statement.getSesCode()
         ));
     }
 
@@ -92,7 +92,7 @@ public class DealServiceImpl implements DealService {
         emailProducerService.send(new EmailMessage(
                 statement.getClient().getEmail(),
                 Theme.CREDIT_ISSUED,
-                UUID.fromString(statementId),
+                statement.getId(),
                 "ссылка на подписание"
         ));
     }

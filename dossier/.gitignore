@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.mvn/
+.mvn/wrapper
+mvnw
+mvnw.cmd
+
+src/main/resources/openapi/templates
+
+.gitattributes
