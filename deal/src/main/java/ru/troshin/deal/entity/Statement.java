@@ -54,7 +54,7 @@ public class Statement {
     private LocalDateTime signDate;
 
     @Column(name = "ses_code")
-    private String ses_code;
+    private String sesCode;
 
     @Column(name = "status_history", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)

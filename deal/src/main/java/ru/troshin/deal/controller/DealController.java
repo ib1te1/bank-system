@@ -39,4 +39,25 @@ public class DealController implements DealApi {
         log.info("POST /deal/statement, body={}", loanStatementRequestDto);
         return ResponseEntity.ok(dealServiceImpl.createStatement(loanStatementRequestDto));
     }
+
+    @Override
+    public ResponseEntity<Void> dealDocumentStatementIdSendPost(String statementId){
+        log.info("POST /deal/document/{statementId}/send, body={}", statementId);
+        dealServiceImpl.createDocuments(statementId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> dealDocumentStatementIdSignPost(String statementId){
+        log.info("POST /deal/document/{statementId}/sign, body={}", statementId);
+        dealServiceImpl.signDocuments(statementId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> dealDocumentStatementIdCodePost(String statementId){
+        log.info("POST /deal/document/{statementId}/code, body={}", statementId);
+        dealServiceImpl.verifySesCode(statementId);
+        return ResponseEntity.noContent().build();
+    }
 }
