@@ -20,14 +20,9 @@ public class AdminController implements AdminApi {
     @Override
     public ResponseEntity<List<StatementDto>> dealAdminStatementGet(Integer limit, Integer offset){
         log.info("HTTP GET /deal/admin/statement called with limit={} offset={}", limit, offset);
-        try {
-            List<StatementDto> list = adminService.findAll(limit, offset);
-            log.info("HTTP GET /deal/admin/statement returned {} items", list.size());
-            return ResponseEntity.ok(list);
-        } catch (Exception ex) {
-            log.error("HTTP GET /deal/admin/statement failed (limit={}, offset={})", limit, offset, ex);
-            throw ex;
-        }
+        List<StatementDto> list = adminService.findAll(limit, offset);
+        log.info("HTTP GET /deal/admin/statement returned {} items", list.size());
+        return ResponseEntity.ok(list);
     }
 
     @Override

@@ -18,5 +18,6 @@ public class ErrorResponse {
     private String downstreamService;
     private Integer downstreamStatus;
     private String downstreamBody;
+    private String downstreamMessage;
 
 }

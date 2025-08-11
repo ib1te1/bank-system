@@ -132,7 +132,6 @@ components:
         birthdate:
           type: string
           format: date
-          x-field-extra-annotation: '@DateOfBirth'
           example: "1990-08-15"
         passportSeries:
           type: string

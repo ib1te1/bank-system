@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.mvn/
+.mvn/wrapper
+mvnw
+mvnw.cmd
+
+.gitattributes
+openapitools.json
+
+doc/.openapi-generator
+doc/.openapi-generator-ignore

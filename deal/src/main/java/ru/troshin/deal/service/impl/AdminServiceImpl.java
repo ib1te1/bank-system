@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.troshin.deal.dto.StatementDto;
+import ru.troshin.deal.entity.Statement;
 import ru.troshin.deal.exception.NoSuchStatementException;
 import ru.troshin.deal.mapper.StatementMapper;
 import ru.troshin.deal.repository.StatementRepository;
@@ -29,11 +30,9 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<StatementDto> findAll(Integer limit, Integer offset) {
         log.info("AdminService.findAll called with limit={} offset={}", limit, offset);
-        int safeLimit = (limit == null || limit <= 0) ? 10 : limit;
-        int safeOffset = (offset == null || offset < 0) ? 0 : offset;
-        int page = safeOffset / safeLimit;
-        Pageable pageable = PageRequest.of(page, safeLimit);
-        log.debug("Computed paging: safeLimit={}, safeOffset={}, page={}, pageable={}", safeLimit, safeOffset, page, pageable);
+        int page = offset / limit;
+        Pageable pageable = PageRequest.of(page, limit);
+        log.debug("Computed paging: safeLimit={}, safeOffset={}, page={}, pageable={}", limit, offset, page, pageable);
         try {
             var pageResult = statementRepository.findAll(pageable);
             List<StatementDto> list = pageResult
@@ -54,30 +53,15 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public StatementDto findById(String statementId) {
         log.info("AdminService.findById called with statementId={}", statementId);
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(statementId);
-            log.debug("Parsed statementId to UUID={}", uuid);
-        } catch (IllegalArgumentException ex) {
-            log.error("Invalid UUID format for statementId={}", statementId, ex);
-            throw new NoSuchStatementException("Invalid statement id format: " + statementId);
-        }
+        var statement = findStatementOrThrow(UUID.fromString(statementId));
+        StatementDto dto = statementMapper.toStatementDto(statement);
+        log.info("AdminService.findById completed for id={}", statementId);
+        log.debug("Found statement dto: {}", dto);
+        return dto;
+    }
 
-        try {
-            var opt = statementRepository.findById(uuid);
-            if (opt.isEmpty()) {
-                log.warn("Statement not found for id={}", uuid);
-                throw new NoSuchStatementException("Statement not found: " + statementId);
-            }
-            StatementDto dto = statementMapper.toStatementDto(opt.get());
-            log.info("AdminService.findById completed for id={}", uuid);
-            log.debug("Found statement dto: {}", dto);
-            return dto;
-        } catch (NoSuchStatementException e) {
-            throw e;
-        } catch (Exception ex) {
-            log.error("AdminService.findById unexpected error for id={}", statementId, ex);
-            throw ex;
-        }
+    private Statement findStatementOrThrow(UUID id) {
+        return statementRepository.findById(id)
+                .orElseThrow(() -> new NoSuchStatementException("Statement not found: " + id));
     }
 }
