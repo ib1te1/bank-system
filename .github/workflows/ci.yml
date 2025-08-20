@@ -32,6 +32,11 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: Ensure cache directories exist
+        run: |
+          mkdir -p ~/.sonar/cache
+          mkdir -p ~/.m2/repository
+
       - name: Cache Sonar and Maven
         uses: actions/cache@v4
         with:
