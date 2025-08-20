@@ -142,6 +142,7 @@
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useBeanValidation>true</useBeanValidation>
+                                <useTags>true</useTags>
                                 <groupPathsBy>tags</groupPathsBy>
                                 <useJakartaEe>true</useJakartaEe>
                             </configOptions>
