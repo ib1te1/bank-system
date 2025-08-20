@@ -1,0 +1,16 @@
+target/
+
+.idea
+*.iws
+*.iml
+*.ipr
+
+.mvn/
+.mvn/wrapper
+mvnw
+mvnw.cmd
+
+
+.gitattributes
+
+secrets
