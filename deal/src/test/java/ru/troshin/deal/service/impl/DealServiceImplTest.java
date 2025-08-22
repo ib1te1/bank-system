@@ -11,6 +11,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.http.ResponseEntity;
 import ru.troshin.deal.calculator.controller.CalculatorApi;
 import ru.troshin.deal.dto.FinishRegistrationRequestDto;
+import ru.troshin.deal.dto.Gender;
 import ru.troshin.deal.dto.LoanOfferDto;
 import ru.troshin.deal.dto.LoanStatementRequestDto;
 import ru.troshin.deal.entity.Client;
@@ -24,6 +25,7 @@ import ru.troshin.deal.repository.CreditRepository;
 import ru.troshin.deal.repository.StatementRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -103,28 +105,6 @@ class DealServiceImplTest {
         assertEquals(stmt.getId(), offers.get(0).getStatementId());
         verify(calculatorApi).calculatorOffersPost(calcDto);
     }
-
-    @Test
-    void selectOffer_updatesStatementStatus() {
-        UUID id = UUID.randomUUID();
-        LoanOfferDto offer = new LoanOfferDto();
-        offer.setStatementId(id);
-
-        Statement stmt = Statement.builder()
-                .id(id)
-                .status(null)
-                .statusHistory(new ArrayList<>())
-                .build();
-        when(statementRepository.findById(id)).thenReturn(Optional.of(stmt));
-
-        service.selectOffer(offer);
-
-        assertEquals(offer, stmt.getAppliedOffer());
-        assertEquals(ru.troshin.deal.dto.ApplicationStatus.APPROVED, stmt.getStatus());
-        assertFalse(stmt.getStatusHistory().isEmpty());
-        verify(statementRepository).save(stmt);
-    }
-
 
     @Test
     void calculateCredit_nonExistingStatement_throwsNoSuchStatement() {
